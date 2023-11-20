@@ -1,0 +1,196 @@
+예제 7-1 코드 리뷰
+
+태호
+#include <iostream>
+using namespace std;
+
+class Rect;
+bool equals(Rect r, Rect s); // equals() 함수 선언
+
+class Rect { // Rect 클래스 선언
+    int width, height;    //기본적으로 private 상태
+public:
+    Rect(int width, int height) { this->width = width; this->height = height; }
+    friend bool equals(Rect r, Rect s);
+};
+bool equals(Rect r, Rect s) { // 외부 함수
+    if(r.width == s.width && r.height == s.height) return true;
+    else return false;
+}
+int main() {
+    Rect a(3,4), b(4,5);
+    if(equals(a, b)) cout << "equal" << endl;
+    else cout << "not equal" << endl;
+}
+
+ 클래스 내부의 변수는 기본적으로 private이라 클래스 외부에서 내부의 변수들에 접근할 수 없지만 위 코드에서 처럼 friend 함수를 사용하면 클래스 외부의 함수가 크래스 내부의 변수들에 접근할 수 있습니다.
+
+ 예제 7-2 코드 리뷰
+ 
+ 재연
+
+ #include <iostream>
+using namespace std;
+
+class Rect;
+
+class RectManager { 
+public:
+    bool equals(Rect r, Rect s);
+};
+
+class Rect { 
+private:
+    int width, height;
+
+public:
+    Rect(int width, int height) { 
+        this->width = width; 
+        this->height = height; 
+    }
+
+    friend bool RectManager::equals(Rect r, Rect s);
+};
+
+bool RectManager::equals(Rect r, Rect s) {
+    if (r.width == s.width && r.height == s.height)
+        return true;
+    else
+        return false;
+}
+
+int main() {
+    Rect a(3, 4), b(3, 4);
+    RectManager man;
+
+    if (man.equals(a, b))
+        cout << "equal" << endl;
+    else
+        cout << "not equal" << endl;
+
+    return 0;
+}
+
+Rect 객체를 비교하는 equals 함수를 담고 있는 RectManager 클래스를 선언, RectManager 클래스를 프렌드로 선언하여, equals 함수에서 Rect의 private 멤버에 접근이 가능하게 하기
+RectManager 클래스의 equals 함수를 정의하여 두 Rect 객체가 같으면 true, 아니라면 false 반환
+equals 함수가 true를 반환하면 "equal" 출력, 아니라면 "not equal" 출력
+
+예제 7-12 코드리뷰
+재연
+
+ #include <iostream>
+using namespace std;
+
+class Power {
+    int kick;
+    int punch;
+
+public:
+    Power(int kick = 0, int punch = 0) {
+        this->kick = kick;
+        this->punch = punch;
+    }
+
+    void show(); // Power 객체의 정보 출력 멤버 함수
+    friend Power operator+(Power op1, Power op2); // + 연산자 오버로딩을 위한 프렌드 함수 선언
+};
+
+void Power::show() {
+    cout << "kick=" << kick << ',' << "punch=" << punch << endl;
+}
+
+// + 연산자를 오버로딩한 함수
+Power operator+(Power op1, Power op2) {
+    Power tmp; // 임시 객체 생성
+    tmp.kick = op1.kick + op2.kick; // kick를 더함
+    tmp.punch = op1.punch + op2.punch; // punch를 더함
+    return tmp; // 임시 객체 반환
+}
+
+int main() {
+    Power a(3, 5), b(4, 6), c;
+    c = a + b; // Power 객체 간 + 연산 수행
+    a.show();
+    b.show();
+    c.show();
+}
+
+kick, punch 두 개의 정수형 변수를 갖는 Power 클래스 선언, 두 개의 Power 객체를 받아서
+kick, punch 를 더한 새로운 'Power' 객체를 반환하는 operator+ 함수 구현
+연산자 오버로딩을 이용해 기존의 연산자를 사용하여 데이터 타입에 대한 연산을 지원
+friend 함수를 사용해 'Power' 클래스에 대한 접근 권한을 부여, 'operator+' 함수가 'Power' 클래스의 private 멤버에 직접 접근할 수 있게 됨.
+
+예제 7-13 코드 리뷰
+태호
+7-13
+
+#include <iostream>
+using namespace std;
+class Power {
+    int kick;
+    int punch;
+public:
+    Power(int kick=0, int punch=0) { this->kick = kick; this->punch = punch; }
+void show();
+    friend Power& operator++(Power& op); // 전위 ++ 연산자 함수 프렌드 선언
+    friend Power operator++(Power& op, int x); // 후위 ++ 연산자 함수 프렌드 선언
+};
+void Power::show() {
+    cout << "kick=" << kick << ',' << "punch=" << punch << endl;
+Power& operator++(Power& op) { // 전위 ++ 연산자 함수 구현
+    op.kick++;
+    op.punch++;
+return op; // 연산 결과 리턴
+}
+Power operator++(Power& op, int x) { // 후위 ++ 연산자 함수 구현
+    Power tmp = op; // 변경하기 전의 op 상태 저장
+    op.kick++;
+    op.punch++;
+    return tmp; // 변경 이전의 op 리턴
+}
+int main() {
+    Power a(3,5), b;
+    b = ++a; // 전위 ++ 연산자
+    a.show(); b.show();
+    b = a++; // 후위 ++ 연산자
+    a.show(); b.show();
+}
+ 위 코드에서 프랜드 함수를 쓴 이유는 연산자 앞에 클래스 내부에 접근할 변수가 없기 때문에 프랜드 함수를 사용하였습니다. 
+ 전위 연산자에서 참조를 반환한 이유는 복사로 인해 추가적인 메모리 할당을 하지 않기 위해서 입니다.
+
+
+Q. 맞는 코드를 고르고 그 이유 설명하기.
+Power& return_This() {
+    return *this;
+};
+
+Power return_This() {
+    return *this;
+};
+
+Power& return_This() {
+    return this;
+};
+
+Power * return_This() {
+    return this;
+};
+
+Power return_This() {
+    return this;
+};
+
+태호 : 1, 3, 5
+1번 이유: 함수가 *this가 가리키는 참조를 돌려주기 때문에 문제가 없다고 생각했습니다
+3번 이유; this의 참조를 반환했기 때문에 문제가 없다고 생각했습니다
+5번 이유: this를 새로 복사해서 반환했기에 문제가 없다고 생각했습니다
+2,4 아니라 생각한 이유: 포인터는 참조와 함께해야만 한다고 생각해서 답이 아니라고 생각했습니다
+
+재연 : 1, 2
+1번 이유: Power 객체의 참조를 반환한 뒤에 *this를 반환하여 현재 객체의 참조를 반환하기 때문에 틀리지 않았음.
+2번 이유: Power 객체를 반환한 뒤에 *this를 반환하여 현재 객체를 복사한 새로운 객체를 반환하기 때문에 틀리지 않았음.
+
+3,4,5 가 답이 아니라 생각한 이유
+3번 이유 : Power 객체의 참조를 반환하려 했으나 this는 현재 객체의 주소를 가리키고 객체의 주소와 객체 자체는 서로 다른 유형임.
+4번 이유 : Power 객체의 포인터를 반환하려 했으나 this는 현재 객체의 주소를 나타내는 포인터이므로 반환 타입은 포인터 형태여야함.
+5번 이유 : Power 객체를 반환하려고 했으나 this는 현재 객체의 주소를 나타내는 포인터이므로 객체 자체를 반환하는 대신에 포인터를 반환함.
