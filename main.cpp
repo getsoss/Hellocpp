@@ -1,13 +1,23 @@
 #include <iostream>
+
 using namespace std;
 
-#include "Ram.h"
+bool average(int a[], int size, int &avg){
+   if(size <= 0)
+      return false;
+   int sum = 0;
+   for(int i = 0; i < size; i++)
+      sum += a[i];
+   avg = sum/size;
+   return true;
+}
 
 int main() {
-   Ram ram;
-   ram.write(100, 20);
-   ram.write(101, 30);
-   char res = ram.read(100) + ram.read(101);
-   ram.write(102, res);
-   cout << "102 번지의 값 = " << (int)ram.read(102) << endl;
+   int x[] = {0,1,2,3,4,5};
+   int avg;
+   if(average(x, 6, avg)) cout << "평균은" << avg << endl;
+   else cout << "매개 변수 오류" << endl;
+
+   if(average(x, -2, avg)) cout << "평균은" << avg << endl;
+   else cout << "매개 변수 오류" << endl;
 }
